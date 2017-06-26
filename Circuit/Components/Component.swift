@@ -10,7 +10,7 @@ class ComponentFunc {
 	}
 }
 
-class Component : Hashable {
+class Component: Hashable {
 	var numInputs: Int { return 0 }
 	var numOutputs: Int { return 0 }
 	
@@ -45,17 +45,23 @@ class Component : Hashable {
 		inputsChanged.raise(data: Void())
 	}
 	
-	func getOutputValue(outputIndex: Int) -> Bool {
-		guard outputIndex >= 0 && outputIndex < numOutputs else {
+	private func getOutputValue(outputIndex: Int, seenComponents: inout Set<Component>) -> Bool {
+		guard outputIndex >= 0 && outputIndex < numOutputs && !seenComponents.contains(self) else {
 			return false
 		}
 		let inputValues = inputs.map { (_: Int, value: (Component, Int)?) -> Bool in
 			if let inputComponent = value {
-				return inputComponent.0.getOutputValue(outputIndex: inputComponent.1)
+				seenComponents.insert(self)
+				return inputComponent.0.getOutputValue(outputIndex: inputComponent.1, seenComponents: &seenComponents)
 			}
 			return false
 		}
 		return outputs[outputIndex]!.f(inputValues)
+	}
+	
+	func getOutputValue(outputIndex: Int) -> Bool {
+		var seenComponents = Set<Component>()
+		return getOutputValue(outputIndex: outputIndex, seenComponents: &seenComponents)
 	}
 	
 	static func == (lhs: Component, rhs: Component) -> Bool {
