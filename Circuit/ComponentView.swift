@@ -38,11 +38,18 @@ class ConnectorNode: SKSpriteNode {
 		if let oldLineNode = connectingLineNodes[connection] {
 			oldLineNode.removeFromParent()
 		}
+		
+		let xDistance = abs(pos.x)
+		let curveAmount = xDistance / 2.0
 		var points = [
 			CGPoint.zero,
+			CGPoint(x: curveAmount, y: 0),
+			CGPoint(x: pos.x - curveAmount, y: pos.y),
 			pos,
 			]
 		let newNode = SKShapeNode(points: &points, count: points.count)
+		newNode.lineWidth = 3
+		newNode.strokeColor = NSColor(calibratedWhite: 1.0, alpha: 0.5)
 		newNode.name = "connectingLineNode"
 		newNode.isUserInteractionEnabled = false
 		newNode.zPosition = -5.0
