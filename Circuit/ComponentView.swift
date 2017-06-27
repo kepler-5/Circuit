@@ -3,6 +3,8 @@ import SpriteKit
 
 let NoConnectionColor = NSColor.red
 let ConnectionColor = NSColor.green
+let IncompleteConnectionsColor = NSColor.yellow
+let CompleteConnectionsColor = NSColor.white
 
 class ConnectorNode: SKSpriteNode {
 	private var connectingLineNodes = Dictionary<ConnectorNode, SKShapeNode>()
@@ -236,6 +238,9 @@ class ComponentView: SKSpriteNode {
 		self.name = "component"
 		setUpConnectorNodes()
 		self.colorBlendFactor = 1.0
+		
+		gameScene.model.circuitStateChanged.addHandler(handler: updateColor)
+		updateColor()
 	}
 	
 	required init?(coder aDecoder: NSCoder) {
@@ -273,6 +278,12 @@ class ComponentView: SKSpriteNode {
 	override func mouseUp(with event: NSEvent) {
 		self.touchUp(atPoint: event.location(in: self))
 	}
+	
+	func updateColor() {
+		self.color = component.inputsComplete()
+			? CompleteConnectionsColor
+			: IncompleteConnectionsColor
+	}
 }
 
 class SingleComponentView: ComponentView {
@@ -281,17 +292,18 @@ class SingleComponentView: ComponentView {
 
 		assert((component as? Single) != nil)
 		updateColor()
-		gameScene.model.circuitStateChanged.addHandler(handler: updateColor)
 	}
 	
 	required init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
 	
-	func updateColor() {
-		self.color = self.component.getOutputValue(outputIndex: 0)
-			? ConnectionColor
-			: NoConnectionColor
+	override func updateColor() {
+		self.color = component.inputsComplete()
+			? (self.component.getOutputValue(outputIndex: 0)
+				? ConnectionColor
+				: NoConnectionColor)
+			: IncompleteConnectionsColor
 	}
 }
 
@@ -314,7 +326,7 @@ class GlobalInputComponentView: ComponentView {
 		updateColor()
 	}
 	
-	func updateColor() {
+	override func updateColor() {
 		self.color = component.getOutputValue(outputIndex: 0)
 			? ConnectionColor
 			: NoConnectionColor

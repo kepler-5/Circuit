@@ -64,6 +64,13 @@ class Component: Hashable {
 		return getOutputValue(outputIndex: outputIndex, seenComponents: &seenComponents)
 	}
 	
+	func inputsComplete() -> Bool {
+		if inputs.filter({ $1 == nil }).count == 0 {
+			return inputs.map({ $1 == nil ? false : $1!.0.inputsComplete() }).reduce(true, {$0 && $1})
+		}
+		return false
+	}
+	
 	static func == (lhs: Component, rhs: Component) -> Bool {
 		return lhs.hashValue == rhs.hashValue
 	}
