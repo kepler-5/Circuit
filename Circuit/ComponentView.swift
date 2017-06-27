@@ -5,9 +5,12 @@ let NoConnectionColor = NSColor.red
 let ConnectionColor = NSColor.green
 
 class ConnectorNode: SKSpriteNode {
-	private var connectingLineNode: SKShapeNode?
-	private var connection: ConnectorNode?
-	private var touchDown = false
+	private var connectingLineNodes = Dictionary<ConnectorNode, SKShapeNode>()
+	// the currently-being-dragged line we treat as being connected to self
+	private var connections = Set<ConnectorNode>()
+	private var isTouchDown = false
+	private var overrideIsTouchDown = false
+	private var previousConnection: ConnectorNode?
 	
 	enum ConnectorType {
 		case InputConnector
@@ -30,75 +33,104 @@ class ConnectorNode: SKSpriteNode {
 		fatalError("init(coder:) has not been implemented")
 	}
 	
-	func updateConnectionLine(newPos pos: CGPoint) {
+	func updateConnectionLine(forConnection connection: ConnectorNode, newPos pos: CGPoint) {
 		guard connectorType == ConnectorType.OutputConnector else { return }
-		if let oldLineNode = connectingLineNode {
+		if let oldLineNode = connectingLineNodes[connection] {
 			oldLineNode.removeFromParent()
 		}
 		var points = [
 			CGPoint.zero,
 			pos,
 			]
-		connectingLineNode = SKShapeNode(points: &points, count: points.count)
-		connectingLineNode?.isUserInteractionEnabled = false
-		connectingLineNode?.zPosition = -5.0
-		addChild(connectingLineNode!)
+		let newNode = SKShapeNode(points: &points, count: points.count)
+		newNode.name = "connectingLineNode"
+		newNode.isUserInteractionEnabled = false
+		newNode.zPosition = -5.0
+		addChild(newNode)
+		connectingLineNodes.updateValue(newNode, forKey: connection)
 	}
 	
-	func updateConnectionLine() {
-		guard let connection = self.connection else { return }
+	func updateConnectionLine(forConnection connection: ConnectorNode) {
 		let newPos = self.convert(CGPoint.zero, from: connection)
-		updateConnectionLine(newPos: newPos)
+		updateConnectionLine(forConnection: connection, newPos: newPos)
 	}
 	
-	func severConnection() {
-		connectingLineNode?.removeFromParent()
-		if let c = connection {
-			c.component.removeConnectionLine(connectorIndex: c.connectorIndex)
+	func updateAllConnectionLines() {
+		for connection in connectingLineNodes.keys {
+			updateConnectionLine(forConnection: connection)
 		}
-		connection = nil
+	}
+	
+	func severConnection(_ connection: ConnectorNode) {
+		connectingLineNodes[connection]?.removeFromParent()
+		connectingLineNodes.removeValue(forKey: connection)
+		if connections.contains(connection) {
+			connection.component.removeConnectionLine(connectorIndex: connection.connectorIndex)
+		}
+		connections.remove(connection)
 	}
 	
 	func touchDown(atPoint pos : CGPoint) {
-		if self.frame.contains(self.convert(pos, to: self.parent!)) {
-			touchDown = true
-			severConnection()
-			updateConnectionLine(newPos: pos)
+		if connectorType == ConnectorType.InputConnector {
+			if let existingConnection = self.component.getConnectionLine(inputIndex: self.connectorIndex) {
+				existingConnection.severConnection(self)
+				previousConnection = existingConnection
+				existingConnection.overrideIsTouchDown = true
+				existingConnection.touchDown(atPoint: convert(pos, to: existingConnection))
+				existingConnection.overrideIsTouchDown = false
+				isTouchDown = true
+			} else {
+				isTouchDown = false
+			}
 		} else {
-			touchDown = false
+			if overrideIsTouchDown || self.frame.contains(self.convert(pos, to: self.parent!)) {
+				isTouchDown = true
+				updateConnectionLine(forConnection: self, newPos: pos)
+			} else {
+				isTouchDown = false
+			}
 		}
 	}
 	
 	func touchMoved(toPoint pos : CGPoint) {
-		guard touchDown else { return }
-		updateConnectionLine(newPos: pos)
+		guard isTouchDown else { return }
+		guard connectorType == ConnectorType.OutputConnector else {
+			if let previousConnection = previousConnection {
+				previousConnection.touchMoved(toPoint: convert(pos, to: previousConnection))
+			}
+			return
+		}
+		
+		updateConnectionLine(forConnection: self, newPos: pos)
 	}
 	
 	func touchUp(atPoint pos : CGPoint) {
-		guard touchDown else { return }
-		var boundToTarget = false
-		guard connectorType == ConnectorType.OutputConnector else { return }
+		guard isTouchDown else { return }
+		guard connectorType == ConnectorType.OutputConnector else {
+			if let previousConnection = previousConnection {
+				previousConnection.touchUp(atPoint: convert(pos, to: previousConnection))
+			}
+			return
+		}
+		severConnection(self)
+		var newConnection: ConnectorNode?
 		let worldPos = self.convert(pos, to: self.scene!)
 		self.scene!.enumerateChildNodes(withName: "//component/connector", using: { (node: SKNode, stop: UnsafeMutablePointer<ObjCBool>) in
 			guard node != self else { return }
 			let nodePoint = node.parent!.convert(worldPos, from: self.scene!)
 			if node.frame.contains(nodePoint) {
 				if let connector = node as? ConnectorNode, connector.connectorType == ConnectorType.InputConnector {
-					self.severConnection()
 					stop.initialize(to: true)
-					self.connection = connector
+					self.connections.insert(connector)
 					connector.component.receiveConnectionLine(node: self, inputIndex: connector.connectorIndex)
-					boundToTarget = true
+					newConnection = connector
 				}
 			}
 		})
-		if !boundToTarget {
-			connectingLineNode?.removeFromParent()
-			connectingLineNode = nil
-		} else {
-			updateConnectionLine()
+		if let newConnection = newConnection {
+			updateConnectionLine(forConnection: newConnection)
 		}
-		touchDown = false
+		isTouchDown = false
 	}
 	
 	override func mouseDown(with event: NSEvent) {
@@ -124,7 +156,7 @@ class ComponentView: SKSpriteNode {
 	
 	func receiveConnectionLine(node: ConnectorNode, inputIndex: Int) {
 		if let oldConnectionLine = self.receivingConnectionLines[inputIndex] {
-			oldConnectionLine.severConnection()
+			oldConnectionLine.severConnection(connectors[inputIndex])
 		}
 		self.receivingConnectionLines.updateValue(node, forKey: inputIndex)
 		self.component.receiveConnection(comp: (node.component.component, node.connectorIndex), input: inputIndex)
@@ -133,10 +165,13 @@ class ComponentView: SKSpriteNode {
 		self.receivingConnectionLines.removeValue(forKey: connectorIndex)
 		self.component.removeConnection(input: connectorIndex)
 	}
+	func getConnectionLine(inputIndex: Int) -> ConnectorNode? {
+		return receivingConnectionLines[inputIndex]
+	}
 	
 	func updateOutputConnectionLines() {
 		for c in connectors.filter({ $0.connectorType == ConnectorNode.ConnectorType.OutputConnector }) {
-			c.updateConnectionLine()
+			c.updateAllConnectionLines()
 		}
 	}
 	
