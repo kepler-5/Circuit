@@ -1,11 +1,3 @@
-//
-//  GameScene.swift
-//  Circuit
-//
-//  Created by Logan Smith on 6/24/17.
-//  Copyright © 2017 Logan Smith. All rights reserved.
-//
-
 import SpriteKit
 import GameplayKit
 
@@ -49,17 +41,8 @@ class GameScene: SKScene {
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
 	
-	var model: Model
-	
-	override init(size: CGSize) {
-		model = Model()
-		super.init(size: size)
-	}
-	
-	required init?(coder aDecoder: NSCoder) {
-		model = Model()
-		super.init(coder: aDecoder)
-	}
+	let model = Model()
+    let viewState = CircuitViewState()
 	
 	func doSanityTests() {
 		let g1 = GlobalInput()

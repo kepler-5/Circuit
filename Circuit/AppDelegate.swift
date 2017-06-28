@@ -1,12 +1,3 @@
-//
-//  AppDelegate.swift
-//  Circuit
-//
-//  Created by Logan Smith on 6/24/17.
-//  Copyright © 2017 Logan Smith. All rights reserved.
-//
-
-
 import Cocoa
 
 @NSApplicationMain

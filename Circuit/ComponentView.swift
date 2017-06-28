@@ -162,6 +162,18 @@ class ComponentView: SKSpriteNode {
 	private var startingTouchPos: CGPoint?
 
 	private var receivingConnectionLines = Dictionary<Int, ConnectorNode>()
+
+    override var zPosition: CGFloat {
+        didSet {
+            for connector in connectors {
+                connector.zPosition = self.zPosition + 1.0
+            }
+        }
+    }
+
+    private var gameScene: GameScene? {
+        return self.scene as? GameScene
+    }
 	
 	func receiveConnectionLine(node: ConnectorNode, inputIndex: Int) {
 		if let oldConnectionLine = self.receivingConnectionLines[inputIndex] {
@@ -241,6 +253,7 @@ class ComponentView: SKSpriteNode {
 		
 		gameScene.model.circuitStateChanged.addHandler(handler: updateColor)
 		updateColor()
+        gameScene.viewState.select(self)
 	}
 	
 	required init?(coder aDecoder: NSCoder) {
@@ -248,7 +261,7 @@ class ComponentView: SKSpriteNode {
 	}
 	
 	func touchDown(atPoint pos : CGPoint) {
-		self.zPosition = 1.0
+        gameScene?.viewState.select(self)
 		startingTouchPos = pos
 	}
 	
@@ -263,9 +276,7 @@ class ComponentView: SKSpriteNode {
 		updateInputConnectionLines()
 	}
 	
-	func touchUp(atPoint pos : CGPoint) {
-		self.zPosition = 0.0
-	}
+	func touchUp(atPoint pos : CGPoint) {}
 	
 	override func mouseDown(with event: NSEvent) {
 		self.touchDown(atPoint: event.location(in: self))
