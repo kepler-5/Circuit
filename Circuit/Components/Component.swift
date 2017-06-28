@@ -6,7 +6,7 @@ class ComponentFunc {
 	var f: FuncType
 	
 	init() {
-		f = { (_: [Bool]) -> Bool in false }
+		f = { _ in false }
 	}
 }
 
@@ -65,10 +65,8 @@ class Component: Hashable {
 	}
 	
 	func inputsComplete() -> Bool {
-		if inputs.filter({ $1 == nil }).count == 0 {
-			return inputs.map({ $1 == nil ? false : $1!.0.inputsComplete() }).reduce(true, {$0 && $1})
-		}
-		return false
+		return inputs.filter{ $1 == nil }.count == 0
+			&& inputs.map{ $1!.0.inputsComplete() }.reduce(true, {$0 && $1})
 	}
 	
 	static func == (lhs: Component, rhs: Component) -> Bool {
@@ -85,7 +83,7 @@ class GlobalInput: Component {
 	override init() {
 		state = false
 		super.init()
-		outputs[0]!.f = { (_: [Bool]) -> Bool in self.state }
+		outputs[0]!.f = { _ in self.state }
 	}
 }
 
@@ -123,12 +121,12 @@ class LogicGate: Component {
 
 class AndGate: LogicGate {
 	override func logicFunc(_ bs: [Bool]) -> Bool {
-		return bs.reduce(true, { (b1: Bool, b2: Bool) -> Bool in b1 && b2 })
+		return bs.reduce(true, { $0 && $1 })
 	}
 }
 
 class OrGate: LogicGate {
 	override func logicFunc(_ bs: [Bool]) -> Bool {
-		return bs.reduce(false, { (b1: Bool, b2: Bool) -> Bool in b1 || b2 })
+		return bs.reduce(false, { $0 || $1 })
 	}
 }
