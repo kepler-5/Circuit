@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		028A1F0A1F0359800046FA70 /* CircuitViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028A1F091F0359800046FA70 /* CircuitViewState.swift */; };
+		028A1F0C1F0360A90046FA70 /* ConnectorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028A1F0B1F0360A90046FA70 /* ConnectorNode.swift */; };
 		02E891CF1EFEB4A0006091D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E891CE1EFEB4A0006091D7 /* AppDelegate.swift */; };
 		02E891D11EFEB4A0006091D7 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 02E891D01EFEB4A0006091D7 /* GameScene.sks */; };
 		02E891D31EFEB4A0006091D7 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 02E891D21EFEB4A0006091D7 /* Actions.sks */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		028A1F091F0359800046FA70 /* CircuitViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircuitViewState.swift; sourceTree = "<group>"; };
+		028A1F0B1F0360A90046FA70 /* ConnectorNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectorNode.swift; sourceTree = "<group>"; };
 		02E891CB1EFEB4A0006091D7 /* Circuit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Circuit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02E891CE1EFEB4A0006091D7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		02E891D01EFEB4A0006091D7 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				02E891EB1EFEF225006091D7 /* Event.swift */,
 				02E891E71EFEC72C006091D7 /* Model.swift */,
 				02E891E91EFED3DE006091D7 /* ComponentView.swift */,
+				028A1F0B1F0360A90046FA70 /* ConnectorNode.swift */,
 				028A1F091F0359800046FA70 /* CircuitViewState.swift */,
 				02E891CE1EFEB4A0006091D7 /* AppDelegate.swift */,
 				02E891D01EFEB4A0006091D7 /* GameScene.sks */,
@@ -174,6 +177,7 @@
 				02E891E61EFEB517006091D7 /* Component.swift in Sources */,
 				02E891D51EFEB4A0006091D7 /* GameScene.swift in Sources */,
 				02E891EC1EFEF225006091D7 /* Event.swift in Sources */,
+				028A1F0C1F0360A90046FA70 /* ConnectorNode.swift in Sources */,
 				02E891CF1EFEB4A0006091D7 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
