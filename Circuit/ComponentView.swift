@@ -172,6 +172,8 @@ class SingleComponentView: ComponentView {
 }
 
 class GlobalInputComponentView: ComponentView {
+    private var hasMoved = false
+    
 	override init(component comp: Component, gameScene: GameScene) {
 		super.init(component: comp, gameScene: gameScene)
 		updateColor()
@@ -182,13 +184,24 @@ class GlobalInputComponentView: ComponentView {
 	}
 	
 	override func touchDown(atPoint pos : CGPoint) {
-		let g = self.component as! GlobalInput
-		g.state = !g.state
-		super.touchDown(atPoint: pos)
-		component.inputsChanged.raise(data: ())
-		
-		updateColor()
+        super.touchDown(atPoint: pos)
+        hasMoved = false
 	}
+    
+    override func touchMoved(toPoint pos: CGPoint) {
+        super.touchMoved(toPoint: pos)
+        hasMoved = true;
+    }
+    
+    override func touchUp(atPoint pos: CGPoint) {
+        super.touchUp(atPoint: pos)
+        guard !hasMoved else { return }
+        
+        let g = self.component as! GlobalInput
+        g.state = !g.state
+        component.inputsChanged.raise(data: ())
+        updateColor()
+    }
 	
 	override func updateColor() {
 		self.color = component.getOutputValue(outputIndex: 0)
