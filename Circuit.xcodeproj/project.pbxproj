@@ -288,6 +288,7 @@
 				DEVELOPMENT_TEAM = 7S85E2DAW8;
 				INFOPLIST_FILE = Circuit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.brainiumstudios.Circuit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
@@ -302,6 +303,7 @@
 				DEVELOPMENT_TEAM = 7S85E2DAW8;
 				INFOPLIST_FILE = Circuit/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.brainiumstudios.Circuit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
@@ -327,6 +329,7 @@
 				02E891E21EFEB4A0006091D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
